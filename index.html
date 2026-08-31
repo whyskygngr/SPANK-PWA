@@ -1,0 +1,131 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#f7f7f5">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="apple-mobile-web-app-title" content="SPANK">
+  <meta name="description" content="Spectral Produce Analysis via Nondestructive Knocking">
+  <link rel="manifest" href="./manifest.webmanifest">
+  <link rel="apple-touch-icon" href="./icons/apple-touch-icon.png">
+  <link rel="stylesheet" href="./styles.css">
+  <title>SPANK</title>
+</head>
+<body>
+  <header>
+    <div>
+      <p class="eyebrow">Spectral Produce Analysis via Nondestructive Knocking</p>
+      <h1>SPANK</h1>
+      <p class="lede">Acoustic watermelon measurement. No ripeness grade is inferred until a calibration model exists.</p>
+    </div>
+  </header>
+
+  <main>
+    <section class="panel capturePanel">
+      <div class="sectionHeading">
+        <div>
+          <h2>New measurement</h2>
+          <p>Keep the device position fixed. After the ambient baseline, tap the melon three times about 0.7 seconds apart.</p>
+        </div>
+        <button id="startCapture" class="primary" type="button">Start 3-tap capture</button>
+      </div>
+
+      <div class="metadataGrid">
+        <label>Variety <input id="variety" type="text" autocomplete="off" placeholder="Optional"></label>
+        <label>Brix <input id="brix" type="number" inputmode="decimal" step="0.1" min="0" max="30" placeholder="Optional"></label>
+        <label>Ground truth
+          <select id="groundTruth">
+            <option value="">Not labeled</option>
+            <option>Underripe</option>
+            <option>Ripe</option>
+            <option>Overripe</option>
+            <option>Internal defect</option>
+          </select>
+        </label>
+        <label class="notesLabel">Notes <input id="notes" type="text" autocomplete="off" placeholder="Optional"></label>
+      </div>
+
+      <div id="status" class="status" data-mode="neutral" aria-live="polite">Ready. Microphone data stays on this device; raw audio is discarded after analysis.</div>
+    </section>
+
+    <section id="resultPanel" class="panel" hidden>
+      <div class="sectionHeading compact">
+        <div>
+          <h2>Result</h2>
+          <p>Summary is the median across detected taps.</p>
+        </div>
+        <button id="exportCurrent" type="button" disabled>Export current CSV</button>
+      </div>
+
+      <div class="metrics">
+        <div class="metric"><span>Dominant peak</span><strong id="peakValue">—</strong></div>
+        <div class="metric"><span>T20 decay</span><strong id="decayValue">—</strong></div>
+        <div class="metric"><span>Peak repeatability</span><strong id="repeatabilityValue">—</strong></div>
+        <div class="metric"><span>Taps detected</span><strong id="tapsValue">—</strong></div>
+        <div class="metric"><span>Sample rate</span><strong id="sampleRateValue">—</strong></div>
+        <div class="metric"><span>FFT bins / spectrum</span><strong id="fftBinsValue">—</strong></div>
+      </div>
+
+      <div class="chartPanel">
+        <div class="chartHeading"><h3>Captured waveform</h3></div>
+        <canvas id="waveformCanvas" aria-label="Captured waveform"></canvas>
+      </div>
+
+      <div class="chartPanel">
+        <div class="chartHeading">
+          <h3>Full single-sided spectrum</h3>
+          <div class="chartControls">
+            <label>Trace
+              <select id="tapSelector"><option value="average">Average spectrum</option></select>
+            </label>
+            <label>Range
+              <select id="spectrumRange">
+                <option value="2000">0–2 kHz</option>
+                <option value="5000" selected>0–5 kHz</option>
+                <option value="full">Full Nyquist</option>
+              </select>
+            </label>
+          </div>
+        </div>
+        <canvas id="spectrumCanvas" aria-label="Frequency spectrum"></canvas>
+        <p class="finePrint">Every FFT bin from 0 Hz through Nyquist is stored in the local measurement packet and CSV export. The chart uses relative dB only for display.</p>
+      </div>
+
+      <div class="chartPanel">
+        <div class="chartHeading"><h3>Decay envelope</h3></div>
+        <canvas id="decayCanvas" aria-label="Acoustic decay envelope"></canvas>
+        <p class="finePrint">T20 is the elapsed time for the short-time RMS envelope to drop 20 dB from its early post-impact peak.</p>
+      </div>
+    </section>
+
+    <section class="panel">
+      <div class="sectionHeading compact">
+        <div>
+          <h2>Local dataset</h2>
+          <p>Measurements are kept in this browser using IndexedDB until you delete site data.</p>
+        </div>
+        <div class="actions">
+          <button id="exportAll" type="button" disabled>Export all CSV</button>
+          <button id="clearHistory" class="danger" type="button" disabled>Clear history</button>
+        </div>
+      </div>
+      <div class="tableWrap">
+        <table>
+          <thead><tr><th>Date</th><th>Peak Hz</th><th>T20 ms</th><th>Label</th><th>Export</th><th></th></tr></thead>
+          <tbody id="historyBody"></tbody>
+        </table>
+      </div>
+      <p id="historyEmpty" class="empty">No measurements saved yet.</p>
+    </section>
+
+    <section class="installNote">
+      <strong>Install on iPhone/iPad:</strong> open this page in Safari, tap Share, then <em>Add to Home Screen</em>. Microphone access requires HTTPS.
+    </section>
+  </main>
+
+  <footer>SPANK is an experimental measurement tool, not a validated food-quality or safety instrument.</footer>
+  <script type="module" src="./app.js"></script>
+</body>
+</html>
